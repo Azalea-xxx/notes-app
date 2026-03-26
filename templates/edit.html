@@ -1,53 +1,18 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block content %}
 <h2>Редактировать заметку</h2>
 
 <form method="POST">
-	<input type="text" name="title" value="{{ note.title }}" required />
+	<input type="text" name="title" value="{{ note.title }}" required>
 	<textarea name="content" rows="6" required>{{ note.content }}</textarea>
 
 	<select name="category">
-		<option
-			value="Работа"
-			{%
-			if
-			note.category=""
-			="Работа"
-			%}selected{%
-			endif
-			%}
-		>
-			Работа
-		</option>
-		<option
-			value="Личное"
-			{%
-			if
-			note.category=""
-			="Личное"
-			%}selected{%
-			endif
-			%}
-		>
-			Личное
-		</option>
-		<option value="Учёба" {% if note.category="" ="Учёба" %}selected{% endif %}>
-			Учёба
-		</option>
-		<option value="Идеи" {% if note.category="" ="Идеи" %}selected{% endif %}>
-			Идеи
-		</option>
-		<option
-			value="Другое"
-			{%
-			if
-			note.category=""
-			="Другое"
-			%}selected{%
-			endif
-			%}
-		>
-			Другое
-		</option>
+		<option value="Работа" {% if note.category=="Работа" %}selected{% endif %}>Работа</option>
+		<option value="Личное" {% if note.category=="Личное" %}selected{% endif %}>Личное</option>
+		<option value="Учёба" {% if note.category=="Учёба" %}selected{% endif %}>Учёба</option>
+		<option value="Идеи" {% if note.category=="Идеи" %}selected{% endif %}>Идеи</option>
+		<option value="Другое" {% if note.category=="Другое" %}selected{% endif %}>Другое</option>
 	</select>
 
 	<button type="submit">Сохранить</button>
