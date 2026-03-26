@@ -1,24 +1,116 @@
-{% extends "base.html" %} {% block content %} {% if notes %} {% for note in
-notes %}
-<div class="note">
-	<h3>{{ note.title }}</h3>
-	<p>{{ note.content }}</p>
-	<div class="info">
-		<span class="date">{{ note.date }}</span>
-		<div class="actions">
-			<a href="/edit/{{ note.id }}" class="edit">Редактировать</a>
-			<a
-				href="/delete/{{ note.id }}"
-				class="delete"
-				onclick="return confirm('Удалить?')"
-				>Удалить</a
-			>
+{% extends "base.html" %} {% block content %}
+<!-- Поиск -->
+<input
+	type="text"
+	id="searchInput"
+	placeholder="Поиск по заметкам..."
+	style="
+		width: 100%;
+		padding: 12px;
+		margin-bottom: 15px;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+		font-size: 16px;
+	"
+/>
+
+<!-- Фильтр по категориям -->
+<div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap">
+	<button class="filter-btn active" data-category="all">Все</button>
+	<button class="filter-btn" data-category="Работа">Работа</button>
+	<button class="filter-btn" data-category="Личное">Личное</button>
+	<button class="filter-btn" data-category="Учёба">Учёба</button>
+	<button class="filter-btn" data-category="Идеи">Идеи</button>
+	<button class="filter-btn" data-category="Другое">Другое</button>
+</div>
+
+<div id="notesContainer">
+	{% if notes %} {% for note in notes %}
+	<div
+		class="note"
+		data-title="{{ note.title|lower }}"
+		data-content="{{ note.content|lower }}"
+		data-category="{{ note.category }}"
+	>
+		<div
+			style="display: flex; justify-content: space-between; align-items: center"
+		>
+			<h3>{{ note.title }}</h3>
+			<span class="category-badge">{{ note.category }}</span>
+		</div>
+		<p>{{ note.content }}</p>
+		<div class="info">
+			<span class="date">{{ note.date }}</span>
+			<div class="actions">
+				<a href="/edit/{{ note.id }}" class="edit">Редактировать</a>
+				<a
+					href="/delete/{{ note.id }}"
+					class="delete"
+					onclick="return confirm('Удалить заметку?')"
+					>Удалить</a
+				>
+			</div>
 		</div>
 	</div>
+	{% endfor %} {% else %}
+	<div class="empty">
+		<p>Нет заметок. Создайте первую!</p>
+		<a href="/add" class="btn">Создать заметку</a>
+	</div>
+	{% endif %}
 </div>
-{% endfor %} {% else %}
-<div class="empty">
-	<p>Нет заметок. Создайте первую!</p>
-	<a href="/add" class="btn">Создать заметку</a>
-</div>
-{% endif %} {% endblock %}
+
+<script>
+	const searchInput = document.getElementById('searchInput')
+	const filterBtns = document.querySelectorAll('.filter-btn')
+	let currentCategory = 'all'
+
+	function filterNotes() {
+		const searchText = searchInput.value.toLowerCase()
+		const allNotes = document.querySelectorAll('.note')
+		let visibleCount = 0
+
+		allNotes.forEach(note => {
+			const title = note.getAttribute('data-title')
+			const content = note.getAttribute('data-content')
+			const category = note.getAttribute('data-category')
+
+			const matchesSearch =
+				title.includes(searchText) || content.includes(searchText)
+			const matchesCategory =
+				currentCategory === 'all' || category === currentCategory
+
+			if (matchesSearch && matchesCategory) {
+				note.style.display = ''
+				visibleCount++
+			} else {
+				note.style.display = 'none'
+			}
+		})
+
+		const noResults = document.getElementById('noResults')
+		if (visibleCount === 0 && document.querySelectorAll('.note').length > 0) {
+			if (!noResults) {
+				const msg = document.createElement('div')
+				msg.id = 'noResults'
+				msg.className = 'empty'
+				msg.innerHTML = '<p>По вашему запросу ничего не найдено</p>'
+				document.getElementById('notesContainer').appendChild(msg)
+			}
+		} else if (noResults) {
+			noResults.remove()
+		}
+	}
+
+	searchInput.addEventListener('keyup', filterNotes)
+
+	filterBtns.forEach(btn => {
+		btn.addEventListener('click', function () {
+			filterBtns.forEach(b => b.classList.remove('active'))
+			this.classList.add('active')
+			currentCategory = this.getAttribute('data-category')
+			filterNotes()
+		})
+	})
+</script>
+{% endblock %}
